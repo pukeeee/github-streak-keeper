@@ -29,18 +29,74 @@ git add streak-log.txt
 # Commit with message
 git commit -m "$COMMIT_MESSAGE"
 
-# Push to remote repository using GitHub CLI
-gh repo sync 2>/dev/null || echo "Note: gh repo sync failed or not needed"
-gh pr list > /dev/null 2>&1
+# Get the current branch name
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 
-# Try to push using gh first, fallback to git push if needed
-if gh repo view > /dev/null 2>&1; then
-    git push origin main
-else
-    echo "Warning: Not authenticated with GitHub CLI or not a GitHub repo"
-    echo "Falling back to standard git push"
-    git push origin main
+# If we can't get branch name or it's empty, try to set to main or master
+if [ -z "$BRANCH_NAME" ] || [ "$BRANCH_NAME" = "HEAD" ]; then
+    # Check if main exists
+    if git show-ref --verify --quiet refs/heads/main; then
+        BRANCH_NAME="main"
+    # Check if master exists
+    elif git show-ref --verify --quiet refs/heads/master; then
+        BRANCH_NAME="master"
+    else
+        # Default to main
+        BRANCH_NAME="main"
+    fi
 fi
 
-echo "Successfully committed and pushed to maintain streak!"
-echo "Logged entry: $DATE_TIME"
+# Try to push using GitHub CLI
+echo "Pushing to origin $BRANCH_NAME using GitHub CLI..."
+
+# Check if authenticated with GitHub CLI
+if gh auth status > /dev/null 2>&1; then
+    # Try to push with git first
+    if git push origin "$BRANCH_NAME" 2>/dev/null; then
+        echo "Successfully committed and pushed to maintain streak!"
+        echo "Logged entry: $DATE_TIME"
+    else
+        # If first push failed, try to set upstream and push
+        echo "Trying to set upstream and push..."
+        if git push -u origin "$BRANCH_NAME" 2>/dev/null; then
+            echo "Successfully committed and pushed to maintain streak!"
+            echo "Logged entry: $DATE_TIME"
+        else
+            echo "Failed to push changes. You may need to:"
+            echo "1. Check your internet connection"
+            echo "2. Verify your GitHub repository URL: git remote -v"
+            echo "3. Ensure you have proper permissions"
+            echo "4. Check if you need to authenticate with GitHub"
+            echo ""
+            echo "However, local commit was successful. You can manually push later with:"
+            echo "git push origin $BRANCH_NAME"
+            echo "Logged entry: $DATE_TIME"
+            exit 1
+        fi
+    fi
+else
+    echo "Not authenticated with GitHub CLI. Using standard git push..."
+    # Try to push with git
+    if git push origin "$BRANCH_NAME" 2>/dev/null; then
+        echo "Successfully committed and pushed to maintain streak!"
+        echo "Logged entry: $DATE_TIME"
+    else
+        # If first push failed, try to set upstream and push
+        echo "Trying to set upstream and push..."
+        if git push -u origin "$BRANCH_NAME" 2>/dev/null; then
+            echo "Successfully committed and pushed to maintain streak!"
+            echo "Logged entry: $DATE_TIME"
+        else
+            echo "Failed to push changes. You may need to:"
+            echo "1. Check your internet connection"
+            echo "2. Verify your GitHub repository URL: git remote -v"
+            echo "3. Ensure you have proper permissions"
+            echo "4. Check if you need to authenticate with GitHub"
+            echo ""
+            echo "However, local commit was successful. You can manually push later with:"
+            echo "git push origin $BRANCH_NAME"
+            echo "Logged entry: $DATE_TIME"
+            exit 1
+        fi
+    fi
+fi

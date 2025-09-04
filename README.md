@@ -1,65 +1,98 @@
 # GitHub Streak Keeper
 
-Цей проект допомагає підтримувати щоденну активність (streak) на GitHub шляхом автоматичного створення комітів.
+[Українська версія](README_UA.md)
 
-## Як використовувати
+This project helps maintain daily activity (streak) on GitHub by automatically creating commits.
 
-1. Клонуйте цей репозиторій на свій комп'ютер
-2. Запустіть скрипт щодня:
+## How to Use
+
+1. Clone this repository to your computer
+2. Run the script daily:
    ```bash
    ./streak-commit.sh
    ```
 
-## Альтернативний скрипт з GitHub CLI
+## Alternative Script with GitHub CLI
 
-Також доступний скрипт, який використовує GitHub CLI для ще надійнішого пушу:
+Also available is a script that uses GitHub CLI for more reliable pushing:
 
 ```bash
 ./streak-commit-gh.sh
 ```
 
-## Що робить скрипт
+## What the Script Does
 
-1. Оновлює файл `streak-log.txt`, додаючи поточну мітку часу
-2. Робить `git add` для цього файлу
-3. Створює коміт з повідомленням
-4. Відправляє зміни на віддалений репозиторій (GitHub)
+1. Updates the `streak-log.txt` file by adding the current timestamp
+2. Performs `git add` for this file
+3. Creates a commit with a message
+4. Pushes changes to the remote repository (GitHub)
 
-## Налаштування автоматичного запуску
+## Setting Up Automatic Execution
 
-Ви можете налаштувати автоматичний запуск скрипта за допомогою cron:
+You can set up automatic script execution using cron:
 
 ```bash
-# Відкрити редактор cron
+# Open cron editor
 crontab -e
 
-# Додати цей рядок для запуску щодня о 9:00
+# Add this line to run daily at 9:00 AM
 0 9 * * * /path/to/your/github-streak/streak-commit.sh "Daily streak commit"
 ```
 
-## Налаштування власного повідомлення
+## Custom Commit Message
 
-Ви можете передати власне повідомлення для коміту:
-
-```bash
-./streak-commit.sh "Мій щоденний коміт"
-```
-
-Або з GitHub CLI:
+You can pass a custom message for the commit:
 
 ```bash
-./streak-commit-gh.sh "Мій щоденний коміт через gh"
+./streak-commit.sh "My daily commit"
 ```
 
-## Встановлення GitHub CLI (якщо ще не встановлено)
+Or with GitHub CLI:
 
-Для використання `streak-commit-gh.sh` потрібно встановити GitHub CLI:
+```bash
+./streak-commit-gh.sh "My daily commit via gh"
+```
+
+## Installation
+
+### Standard Version
+
+No additional installation required if you have git installed.
+
+### GitHub CLI Version
+
+To use `streak-commit-gh.sh`, you need to install GitHub CLI:
 
 - macOS: `brew install gh`
-- Windows: Завантажити з https://cli.github.com/
-- Linux: Див. https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+- Windows: Download from https://cli.github.com/
+- Linux: See https://github.com/cli/cli/blob/trunk/docs/install_linux.md
 
-Після встановлення необхідно авторизуватися:
+After installation, authenticate:
 ```bash
 gh auth login
 ```
+
+## Troubleshooting
+
+If you encounter push errors, check:
+1. Your internet connection
+2. Your GitHub repository URL: `git remote -v`
+3. Your permissions for the repository
+4. Whether you need to authenticate with GitHub
+
+Even if pushing fails, the local commit is still created. You can manually push later with:
+```bash
+git push origin main
+```
+(or `master` if that's your default branch)
+
+## How It Works
+
+The script updates a log file with the current timestamp, adds it to git, commits it, and pushes to your GitHub repository. This creates a visible contribution on your GitHub profile, helping maintain your streak.
+
+## Requirements
+
+- Git
+- Bash shell
+- Internet connection
+- GitHub account (for pushing changes)
